@@ -107,6 +107,35 @@ static const int SOURCE_GALLERY = 1;
                                    details:nil]);
         break;
     }
+  } else if ([@"pickImageOrVideo" isEqualToString:call.method]) {
+    _imagePickerController = [[UIImagePickerController alloc] init];
+    _imagePickerController.modalPresentationStyle = UIModalPresentationCurrentContext;
+    _imagePickerController.delegate = self;
+    _imagePickerController.mediaTypes = @[
+      (NSString *)kUTTypeMovie, (NSString *)kUTTypeAVIMovie, (NSString *)kUTTypeVideo,
+      (NSString *)kUTTypeMPEG4,
+      (NSString *)kUTTypeImage
+    ];
+    _imagePickerController.videoQuality = UIImagePickerControllerQualityTypeHigh;
+
+    self.result = result;
+    _arguments = call.arguments;
+
+    int imageSource = [[_arguments objectForKey:@"source"] intValue];
+
+    switch (imageSource) {
+      case SOURCE_CAMERA:
+        [self checkCameraAuthorization];
+        break;
+      case SOURCE_GALLERY:
+        [self checkPhotoAuthorization];
+        break;
+      default:
+        result([FlutterError errorWithCode:@"invalid_source"
+                                   message:@"Invalid video source."
+                                   details:nil]);
+        break;
+    }
   } else {
     result(FlutterMethodNotImplemented);
   }

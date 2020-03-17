@@ -94,6 +94,30 @@ class ImagePicker {
     return path == null ? null : File(path);
   }
 
+  /// Returns a [File] object pointing to the image or video that was picked.
+  ///
+  /// The [source] argument controls where the video comes from. This can
+  /// be either [ImageSource.camera] or [ImageSource.gallery].
+  ///
+  static Future<File> pickImageOrVideo({
+    @required ImageSource source,
+    double maxImageWidth,
+    double maxImageHeight,
+    int imageQuality,
+  }) async {
+    assert(source != null);
+    final String path = await _channel.invokeMethod<String>(
+      'pickImageOrVideo',
+      <String, dynamic>{
+        'source': source.index,
+        'maxWidth': maxImageWidth,
+        'maxHeight': maxImageHeight,
+        'imageQuality': imageQuality,
+      },
+    );
+    return path == null ? null : File(path);
+  }
+
   /// Retrieve the lost image file when [pickImage] or [pickVideo] failed because the  MainActivity is destroyed. (Android only)
   ///
   /// Image or video can be lost if the MainActivity is destroyed. And there is no guarantee that the MainActivity is always alive.
