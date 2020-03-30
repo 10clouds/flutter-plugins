@@ -93,6 +93,7 @@ public class ImagePickerPlugin
 
   static final String METHOD_CALL_IMAGE = "pickImage";
   static final String METHOD_CALL_VIDEO = "pickVideo";
+  static final String METHOD_CALL_IMAGE_OR_VIDEO = "pickImageOrVideo";
   private static final String METHOD_CALL_RETRIEVE = "retrieve";
 
   private static final String CHANNEL = "plugins.flutter.io/image_picker";
@@ -302,6 +303,19 @@ public class ImagePickerPlugin
             break;
           default:
             throw new IllegalArgumentException("Invalid video source: " + imageSource);
+        }
+        break;
+      case METHOD_CALL_IMAGE_OR_VIDEO:
+        imageSource = call.argument("source");
+        switch (imageSource) {
+          case SOURCE_GALLERY:
+            delegate.chooseImageOrVideoFromGallery(call, result);
+            break;
+          case SOURCE_CAMERA:
+            delegate.takeImageOrVideoWithCamera(call, result);
+            break;
+          default:
+            throw new IllegalArgumentException("Invalid image source: " + imageSource);
         }
         break;
       case METHOD_CALL_RETRIEVE:

@@ -329,13 +329,6 @@ public class ImagePickerDelegate
     launchTakeImageWithCameraIntent();
   }
 
-  private boolean needRequestCameraPermission() {
-    if (permissionManager == null) {
-      return false;
-    }
-    return permissionManager.needRequestCameraPermission();
-  }
-
   private void launchTakeImageWithCameraIntent() {
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     boolean canTakePhotos = intentResolver.resolveActivity(intent);
@@ -353,6 +346,72 @@ public class ImagePickerDelegate
     grantUriPermissions(intent, imageUri);
 
     activity.startActivityForResult(intent, REQUEST_CODE_TAKE_IMAGE_WITH_CAMERA);
+  }
+
+  public void chooseImageOrVideoFromGallery(MethodCall methodCall, MethodChannel.Result result) {
+    if (!setPendingMethodCallAndResult(methodCall, result)) {
+      finishWithAlreadyActiveError(result);
+      return;
+    }
+
+    if (!permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+      permissionManager.askForPermission(
+              Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION);
+      return;
+    }
+
+    launchPickImageOrVideoFromGalleryIntent();
+  }
+
+  private void launchPickImageOrVideoFromGalleryIntent() {
+    Intent pickImageIntent = new Intent(Intent.ACTION_GET_CONTENT);
+    pickImageIntent.setType("image/*");
+    pickImageIntent.setType("video/*");
+
+    activity.startActivityForResult(pickImageIntent, REQUEST_CODE_CHOOSE_IMAGE_FROM_GALLERY);
+  }
+
+  public void takeImageOrVideoWithCamera(MethodCall methodCall, MethodChannel.Result result) {
+    if (!setPendingMethodCallAndResult(methodCall, result)) {
+      finishWithAlreadyActiveError(result);
+      return;
+    }
+
+    if (needRequestCameraPermission()
+            && !permissionManager.isPermissionGranted(Manifest.permission.CAMERA)) {
+      permissionManager.askForPermission(
+              Manifest.permission.CAMERA, REQUEST_CAMERA_IMAGE_PERMISSION);
+      return;
+    }
+
+    launchTakeImageOrVideoWithCameraIntent();
+  }
+
+  private void launchTakeImageOrVideoWithCameraIntent() {
+    // TODO
+    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    boolean canTakePhotos = intentResolver.resolveActivity(intent);
+
+    if (!canTakePhotos) {
+      finishWithError("no_available_camera", "No cameras available for taking pictures.");
+      return;
+    }
+
+    File imageFile = createTemporaryWritableImageFile();
+    pendingCameraMediaUri = Uri.parse("file:" + imageFile.getAbsolutePath());
+
+    Uri imageUri = fileUriResolver.resolveFileProviderUriForFile(fileProviderName, imageFile);
+    intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+    grantUriPermissions(intent, imageUri);
+
+    activity.startActivityForResult(intent, REQUEST_CODE_TAKE_IMAGE_WITH_CAMERA);
+  }
+
+  private boolean needRequestCameraPermission() {
+    if (permissionManager == null) {
+      return false;
+    }
+    return permissionManager.needRequestCameraPermission();
   }
 
   private File createTemporaryWritableImageFile() {
