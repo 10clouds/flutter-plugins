@@ -329,13 +329,6 @@ public class ImagePickerDelegate
     launchTakeImageWithCameraIntent();
   }
 
-  private boolean needRequestCameraPermission() {
-    if (permissionManager == null) {
-      return false;
-    }
-    return permissionManager.needRequestCameraPermission();
-  }
-
   private void launchTakeImageWithCameraIntent() {
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     boolean canTakePhotos = intentResolver.resolveActivity(intent);
@@ -353,6 +346,36 @@ public class ImagePickerDelegate
     grantUriPermissions(intent, imageUri);
 
     activity.startActivityForResult(intent, REQUEST_CODE_TAKE_IMAGE_WITH_CAMERA);
+  }
+
+  public void chooseImageOrVideoFromGallery(MethodCall methodCall, MethodChannel.Result result) {
+    if (!setPendingMethodCallAndResult(methodCall, result)) {
+      finishWithAlreadyActiveError(result);
+      return;
+    }
+
+    if (!permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE)) {
+      permissionManager.askForPermission(
+              Manifest.permission.READ_EXTERNAL_STORAGE, REQUEST_EXTERNAL_IMAGE_STORAGE_PERMISSION);
+      return;
+    }
+
+    launchPickImageOrVideoFromGalleryIntent();
+  }
+
+  private void launchPickImageOrVideoFromGalleryIntent() {
+    Intent pickImageIntent = new Intent(Intent.ACTION_GET_CONTENT);
+    pickImageIntent.setType("*/*");
+    String[] mimeTypes = {"image/*", "video/*"};
+    pickImageIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+    activity.startActivityForResult(pickImageIntent, REQUEST_CODE_CHOOSE_IMAGE_FROM_GALLERY);
+  }
+
+  private boolean needRequestCameraPermission() {
+    if (permissionManager == null) {
+      return false;
+    }
+    return permissionManager.needRequestCameraPermission();
   }
 
   private File createTemporaryWritableImageFile() {
