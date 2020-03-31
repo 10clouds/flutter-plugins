@@ -371,42 +371,6 @@ public class ImagePickerDelegate
     activity.startActivityForResult(pickImageIntent, REQUEST_CODE_CHOOSE_IMAGE_FROM_GALLERY);
   }
 
-  public void takeImageOrVideoWithCamera(MethodCall methodCall, MethodChannel.Result result) {
-    if (!setPendingMethodCallAndResult(methodCall, result)) {
-      finishWithAlreadyActiveError(result);
-      return;
-    }
-
-    if (needRequestCameraPermission()
-            && !permissionManager.isPermissionGranted(Manifest.permission.CAMERA)) {
-      permissionManager.askForPermission(
-              Manifest.permission.CAMERA, REQUEST_CAMERA_IMAGE_PERMISSION);
-      return;
-    }
-
-    launchTakeImageOrVideoWithCameraIntent();
-  }
-
-  private void launchTakeImageOrVideoWithCameraIntent() {
-    // TODO
-    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    boolean canTakePhotos = intentResolver.resolveActivity(intent);
-
-    if (!canTakePhotos) {
-      finishWithError("no_available_camera", "No cameras available for taking pictures.");
-      return;
-    }
-
-    File imageFile = createTemporaryWritableImageFile();
-    pendingCameraMediaUri = Uri.parse("file:" + imageFile.getAbsolutePath());
-
-    Uri imageUri = fileUriResolver.resolveFileProviderUriForFile(fileProviderName, imageFile);
-    intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-    grantUriPermissions(intent, imageUri);
-
-    activity.startActivityForResult(intent, REQUEST_CODE_TAKE_IMAGE_WITH_CAMERA);
-  }
-
   private boolean needRequestCameraPermission() {
     if (permissionManager == null) {
       return false;

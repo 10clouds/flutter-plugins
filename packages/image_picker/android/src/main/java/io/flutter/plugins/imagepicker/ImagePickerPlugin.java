@@ -311,9 +311,6 @@ public class ImagePickerPlugin
           case SOURCE_GALLERY:
             delegate.chooseImageOrVideoFromGallery(call, result);
             break;
-          case SOURCE_CAMERA:
-            delegate.takeImageOrVideoWithCamera(call, result);
-            break;
           default:
             throw new IllegalArgumentException("Invalid image source: " + imageSource);
         }
