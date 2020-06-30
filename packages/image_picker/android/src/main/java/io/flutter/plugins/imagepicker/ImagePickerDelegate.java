@@ -74,6 +74,7 @@ public class ImagePickerDelegate
   @VisibleForTesting static final int REQUEST_CODE_TAKE_VIDEO_WITH_CAMERA = 2353;
   @VisibleForTesting static final int REQUEST_EXTERNAL_VIDEO_STORAGE_PERMISSION = 2354;
   @VisibleForTesting static final int REQUEST_CAMERA_VIDEO_PERMISSION = 2355;
+  @VisibleForTesting static final int REQUEST_CODE_CHOOSE_IMAGE_OR_VIDEO_FROM_GALLERY = 2356;
 
   @VisibleForTesting final String fileProviderName;
 
@@ -368,7 +369,7 @@ public class ImagePickerDelegate
     pickImageIntent.setType("*/*");
     String[] mimeTypes = {"image/*", "video/*"};
     pickImageIntent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-    activity.startActivityForResult(pickImageIntent, REQUEST_CODE_CHOOSE_IMAGE_FROM_GALLERY);
+    activity.startActivityForResult(pickImageIntent, REQUEST_CODE_CHOOSE_IMAGE_OR_VIDEO_FROM_GALLERY);
   }
 
   private boolean needRequestCameraPermission() {
@@ -465,6 +466,9 @@ public class ImagePickerDelegate
       case REQUEST_CODE_CHOOSE_IMAGE_FROM_GALLERY:
         handleChooseImageResult(resultCode, data);
         break;
+      case REQUEST_CODE_CHOOSE_IMAGE_OR_VIDEO_FROM_GALLERY:
+        handleChooseImageOrVideoResult(resultCode, data);
+        break;
       case REQUEST_CODE_TAKE_IMAGE_WITH_CAMERA:
         handleCaptureImageResult(resultCode);
         break;
@@ -480,6 +484,18 @@ public class ImagePickerDelegate
 
     return true;
   }
+
+  private void handleChooseImageOrVideoResult(int resultCode, Intent data) {
+    if (resultCode == Activity.RESULT_OK && data != null) {
+      String path = fileUtils.getPathFromUri(activity, data.getData());
+      finishWithSuccess(path);
+      return;
+    }
+    // User cancelled choosing a picture.
+    finishWithSuccess(null);
+  }
+
+
 
   private void handleChooseImageResult(int resultCode, Intent data) {
     if (resultCode == Activity.RESULT_OK && data != null) {

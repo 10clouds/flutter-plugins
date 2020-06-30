@@ -206,9 +206,13 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           FloatingActionButton(
-            onPressed: () {
+            onPressed: () async{
               isVideo = false;
-              _onImageButtonPressed(ImageSource.gallery, context: context);
+              File file =  await ImagePicker.pickImageOrVideo(source: ImageSource.gallery);
+              print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+              print("Picked file: " + file.toString());
+              print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
             },
             heroTag: 'image0',
             tooltip: 'Pick Image from gallery',
