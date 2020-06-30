@@ -209,10 +209,6 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () async{
               isVideo = false;
               File file =  await ImagePicker.pickImageOrVideo(source: ImageSource.gallery);
-              print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-              print("Picked file: " + file.toString());
-              print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
             },
             heroTag: 'image0',
             tooltip: 'Pick Image from gallery',
